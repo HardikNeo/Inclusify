@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organizer Dashboard - Ability</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div class="accessibility-toggle" role="toolbar" aria-label="Accessibility controls">
+    <button onclick="Accessibility.toggleHighContrast()" class="bg-gray-800 text-yellow-400 hover:bg-gray-700" title="Toggle High Contrast (Alt+C)" aria-label="Toggle high contrast"><i class="fas fa-adjust"></i></button>
+    <button onclick="Accessibility.increaseFontSize()" class="bg-gray-800 text-white hover:bg-gray-700" title="Increase Font Size" aria-label="Increase font size"><i class="fas fa-plus"></i></button>
+    <button onclick="Accessibility.decreaseFontSize()" class="bg-gray-800 text-white hover:bg-gray-700" title="Decrease Font Size" aria-label="Decrease font size"><i class="fas fa-minus"></i></button>
+    <button onclick="Accessibility.readPageContent()" class="bg-gray-800 text-blue-400 hover:bg-gray-700" title="Read Page" aria-label="Read page aloud"><i class="fas fa-volume-up"></i></button>
+    <button onclick="VoiceCommands.toggle()" class="bg-gray-800 text-green-400 hover:bg-gray-700" title="Voice Control" aria-label="Toggle voice control"><i class="fas fa-microphone"></i></button>
+  </div>
+  <nav class="bg-white shadow-sm border-b sticky top-0 z-40" role="navigation"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="flex justify-between items-center h-16"><a href="/" class="flex items-center gap-2 text-blue-600 font-bold text-xl"><i class="fas fa-hands-holding-circle text-2xl"></i><span>Ability</span></a><div id="nav-links" class="flex items-center gap-4"></div></div></div></nav>
+
+  <main id="main-content">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Organizer Dashboard</h1>
+          <p class="text-gray-600 mt-1">Manage your opportunities and review applications.</p>
+        </div>
+        <a href="/create-opportunity.html" class="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition">
+          <i class="fas fa-plus mr-2"></i>New Opportunity
+        </a>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-xl p-4 border shadow-sm"><p class="text-sm text-gray-500">My Opportunities</p><p class="text-2xl font-bold text-blue-600" id="stat-opps">0</p></div>
+        <div class="bg-white rounded-xl p-4 border shadow-sm"><p class="text-sm text-gray-500">Total Applications</p><p class="text-2xl font-bold text-purple-600" id="stat-apps">0</p></div>
+        <div class="bg-white rounded-xl p-4 border shadow-sm"><p class="text-sm text-gray-500">Pending Review</p><p class="text-2xl font-bold text-yellow-600" id="stat-pending">0</p></div>
+        <div class="bg-white rounded-xl p-4 border shadow-sm"><p class="text-sm text-gray-500">Accepted</p><p class="text-2xl font-bold text-green-600" id="stat-accepted">0</p></div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-8 mb-8">
+        <div class="bg-white rounded-2xl shadow-sm border p-6">
+          <h2 class="text-lg font-bold text-gray-900 mb-4">Application Status</h2>
+          <canvas id="statusChart" height="200"></canvas>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border p-6">
+          <h2 class="text-lg font-bold text-gray-900 mb-4">Opportunity Types</h2>
+          <canvas id="typeChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-gray-900">Recent Applications</h2>
+          <span id="app-count" class="text-sm text-gray-500"></span>
+        </div>
+        <div id="applications-table" class="overflow-x-auto">
+          <p class="text-center text-gray-500 py-4">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-gray-900 text-gray-400 py-8 mt-auto"><div class="max-w-7xl mx-auto px-4 text-center text-sm"><p>&copy; 2026 Ability.</p></div></footer>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/accessibility.js"></script>
+  <script src="/js/voice-commands.js"></script>
+  <script src="/js/chatbot.js"></script>
+  <script>
+    let allApplications = [];
+
+    async function loadDashboard() {
+      if (!Auth.user || Auth.user.role !== 'organizer') { window.location.href = '/'; return; }
+
+      try {
+        const oppData = await API.get('/api/opportunities/my-opportunities');
+        const opps = oppData.opportunities || [];
+        document.getElementById('stat-opps').textContent = opps.length;
+
+        const appData = await API.get('/api/applications/organizer');
+        allApplications = appData.applications || [];
+        const apps = allApplications;
+
+        document.getElementById('stat-apps').textContent = apps.length;
+        document.getElementById('stat-pending').textContent = apps.filter(a => a.status === 'applied').length;
+        document.getElementById('stat-accepted').textContent = apps.filter(a => a.status === 'accepted').length;
+        document.getElementById('app-count').textContent = `${apps.length} total`;
+
+        const counts = { applied: 0, under_review: 0, accepted: 0, rejected: 0 };
+        apps.forEach(a => { counts[a.status] = (counts[a.status] || 0) + 1; });
+
+        new Chart(document.getElementById('statusChart'), {
+          type: 'doughnut',
+          data: {
+            labels: ['Applied', 'Under Review', 'Accepted', 'Rejected'],
+            datasets: [{ data: [counts.applied, counts.under_review, counts.accepted, counts.rejected], backgroundColor: ['#818cf8', '#fbbf24', '#34d399', '#f87171'] }]
+          },
+          options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        const typeCounts = {};
+        opps.forEach(o => { typeCounts[o.type] = (typeCounts[o.type] || 0) + 1; });
+        new Chart(document.getElementById('typeChart'), {
+          type: 'pie',
+          data: {
+            labels: Object.keys(typeCounts),
+            datasets: [{ data: Object.values(typeCounts), backgroundColor: ['#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899'] }]
+          },
+          options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        renderApplications(apps);
+      } catch (err) { console.error(err); }
+    }
+
+    function renderApplications(apps) {
+      const container = document.getElementById('applications-table');
+      if (apps.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-500 py-8">No applications received yet.</p>';
+        return;
+      }
+
+      container.innerHTML = `
+        <table class="w-full text-sm">
+          <thead><tr class="border-b text-left text-gray-500">
+            <th class="p-3">Applicant</th><th class="p-3">Opportunity</th><th class="p-3">Status</th><th class="p-3">Date</th><th class="p-3">Actions</th>
+          </tr></thead>
+          <tbody>
+            ${apps.slice(0, 20).map(app => `
+              <tr class="border-b hover:bg-gray-50">
+                <td class="p-3"><p class="font-medium">${app.user_id?.name || 'Unknown'}</p><p class="text-xs text-gray-500">${app.user_id?.email || ''}</p></td>
+                <td class="p-3">${app.opportunity_id?.title || 'N/A'}</td>
+                <td class="p-3"><span class="${getBadgeClass(app.status)} text-xs">${app.status.replace('_',' ')}</span></td>
+                <td class="p-3 text-gray-500">${formatDate(app.createdAt)}</td>
+                <td class="p-3">
+                  <select onchange="updateStatus('${app._id}', this.value)" class="px-2 py-1 border rounded text-xs">
+                    <option value="applied" ${app.status==='applied'?'selected':''}>Applied</option>
+                    <option value="under_review" ${app.status==='under_review'?'selected':''}>Under Review</option>
+                    <option value="accepted" ${app.status==='accepted'?'selected':''}>Accepted</option>
+                    <option value="rejected" ${app.status==='rejected'?'selected':''}>Rejected</option>
+                  </select>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function updateStatus(appId, status) {
+      try {
+        await API.patch(`/api/applications/${appId}/status`, { status });
+        showToast('Status updated!', 'success');
+        loadDashboard();
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+
+    async function initPage() { loadDashboard(); }
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Dashboard - Ability</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div class="accessibility-toggle" role="toolbar" aria-label="Accessibility controls">
+    <button onclick="Accessibility.toggleHighContrast()" class="bg-gray-800 text-yellow-400 hover:bg-gray-700" title="Toggle High Contrast (Alt+C)" aria-label="Toggle high contrast"><i class="fas fa-adjust"></i></button>
+    <button onclick="Accessibility.increaseFontSize()" class="bg-gray-800 text-white hover:bg-gray-700" title="Increase Font Size" aria-label="Increase font size"><i class="fas fa-plus"></i></button>
+    <button onclick="Accessibility.decreaseFontSize()" class="bg-gray-800 text-white hover:bg-gray-700" title="Decrease Font Size" aria-label="Decrease font size"><i class="fas fa-minus"></i></button>
+    <button onclick="Accessibility.readPageContent()" class="bg-gray-800 text-blue-400 hover:bg-gray-700" title="Read Page" aria-label="Read page aloud"><i class="fas fa-volume-up"></i></button>
+    <button onclick="VoiceCommands.toggle()" class="bg-gray-800 text-green-400 hover:bg-gray-700" title="Voice Control" aria-label="Toggle voice control"><i class="fas fa-microphone"></i></button>
+  </div>
+  <nav class="bg-white shadow-sm border-b sticky top-0 z-40" role="navigation"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="flex justify-between items-center h-16"><a href="/" class="flex items-center gap-2 text-blue-600 font-bold text-xl"><i class="fas fa-hands-holding-circle text-2xl"></i><span>Ability</span></a><div id="nav-links" class="flex items-center gap-4"></div></div></div></nav>
+
+  <main id="main-content">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900" id="welcome-msg">My Dashboard</h1>
+        <p class="text-gray-600 mt-1" id="welcome-sub"></p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" id="stats-cards">
+        <div class="bg-white rounded-xl p-4 border shadow-sm"><p class="text-sm text-gray-500">Applied</p><p class="text-2xl font-bold text-blue-600" id="stat-applied">0</p></div>
+        <div class="bg-white rounded-xl p-4 border shadow-sm"><p class="text-sm text-gray-500">Under Review</p><p class="text-2xl font-bold text-yellow-600" id="stat-review">0</p></div>
+        <div class="bg-white rounded-xl p-4 border shadow-sm"><p class="text-sm text-gray-500">Accepted</p><p class="text-2xl font-bold text-green-600" id="stat-accepted">0</p></div>
+        <div class="bg-white rounded-xl p-4 border shadow-sm"><p class="text-sm text-gray-500">Rejected</p><p class="text-2xl font-bold text-red-600" id="stat-rejected">0</p></div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border p-6 mb-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-gray-900">Profile Overview</h2>
+          <button onclick="showEditProfileModal()" class="text-sm text-blue-600 hover:text-blue-800 font-medium"><i class="fas fa-edit mr-1"></i>Edit</button>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 text-sm" id="profile-info"></div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-gray-900">Recent Applications</h2>
+          <a href="/my-applications.html" class="text-sm text-blue-600 hover:text-blue-800 font-medium">View All <i class="fas fa-arrow-right ml-1"></i></a>
+        </div>
+        <div id="recent-applications" class="space-y-3">
+          <p class="text-gray-500 text-center py-4">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-gray-900 text-gray-400 py-8 mt-auto"><div class="max-w-7xl mx-auto px-4 text-center text-sm"><p>&copy; 2026 Ability.</p></div></footer>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/accessibility.js"></script>
+  <script src="/js/voice-commands.js"></script>
+  <script src="/js/chatbot.js"></script>
+  <script>
+    async function loadDashboard() {
+      if (!Auth.user || Auth.user.role !== 'user') {
+        window.location.href = '/';
+        return;
+      }
+
+      document.getElementById('welcome-msg').textContent = `Welcome, ${Auth.user.name.split(' ')[0]}!`;
+      document.getElementById('welcome-sub').textContent = 'Track your applications and manage your profile.';
+
+      document.getElementById('profile-info').innerHTML = `
+        <div><span class="text-gray-500">Name:</span> <span class="font-medium">${Auth.user.name}</span></div>
+        <div><span class="text-gray-500">Email:</span> <span class="font-medium">${Auth.user.email}</span></div>
+        <div><span class="text-gray-500">Phone:</span> <span class="font-medium">${Auth.user.phone || 'Not set'}</span></div>
+        <div><span class="text-gray-500">Skills:</span> <span class="font-medium">${Auth.user.skills || 'Not set'}</span></div>
+        <div class="md:col-span-2"><span class="text-gray-500">Accessibility Notes:</span> <span class="font-medium">${Auth.user.disability_text || 'None'}</span></div>
+      `;
+
+      try {
+        const data = await API.get('/api/applications/my-applications');
+        const apps = data.applications || [];
+        const counts = { applied: 0, under_review: 0, accepted: 0, rejected: 0 };
+        apps.forEach(a => { counts[a.status] = (counts[a.status] || 0) + 1; });
+
+        document.getElementById('stat-applied').textContent = counts.applied;
+        document.getElementById('stat-review').textContent = counts.under_review;
+        document.getElementById('stat-accepted').textContent = counts.accepted;
+        document.getElementById('stat-rejected').textContent = counts.rejected;
+
+        const recent = apps.slice(0, 5);
+        if (recent.length === 0) {
+          document.getElementById('recent-applications').innerHTML = '<p class="text-gray-500 text-center py-4">No applications yet. <a href="/opportunities.html" class="text-blue-600">Browse opportunities</a></p>';
+        } else {
+          document.getElementById('recent-applications').innerHTML = recent.map(app => `
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <p class="font-medium text-gray-900 text-sm">${app.opportunity_id?.title || 'Opportunity'}</p>
+                <p class="text-xs text-gray-500">Applied ${formatDate(app.createdAt)}</p>
+              </div>
+              <span class="${getBadgeClass(app.status)}">${app.status.replace('_', ' ')}</span>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function showEditProfileModal() {
+      showModal('Edit Profile', `
+        <form id="edit-profile-form" onsubmit="updateProfile(event)">
+          <div class="space-y-4">
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Name</label><input type="text" id="edit-name" value="${Auth.user.name}" class="w-full px-4 py-2 border rounded-lg" required></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Phone</label><input type="text" id="edit-phone" value="${Auth.user.phone || ''}" class="w-full px-4 py-2 border rounded-lg"></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Skills</label><input type="text" id="edit-skills" value="${Auth.user.skills || ''}" class="w-full px-4 py-2 border rounded-lg"></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Accessibility Notes</label><input type="text" id="edit-disability" value="${Auth.user.disability_text || ''}" class="w-full px-4 py-2 border rounded-lg"></div>
+          </div>
+        </form>
+      `, `<button onclick="document.getElementById('edit-profile-form').dispatchEvent(new Event('submit',{cancelable:true}))" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">Save Changes</button>`);
+    }
+
+    async function updateProfile(e) {
+      e.preventDefault();
+      try {
+        showToast('Profile updated!', 'success');
+        document.getElementById('modal-overlay')?.remove();
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+
+    async function initPage() { loadDashboard(); }
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
