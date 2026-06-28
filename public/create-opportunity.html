@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Opportunity - Ability</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div class="accessibility-toggle" role="toolbar" aria-label="Accessibility controls">
+    <button onclick="Accessibility.toggleHighContrast()" class="bg-gray-800 text-yellow-400 hover:bg-gray-700" title="Toggle High Contrast (Alt+C)" aria-label="Toggle high contrast"><i class="fas fa-adjust"></i></button>
+    <button onclick="Accessibility.increaseFontSize()" class="bg-gray-800 text-white hover:bg-gray-700" title="Increase Font Size" aria-label="Increase font size"><i class="fas fa-plus"></i></button>
+    <button onclick="Accessibility.decreaseFontSize()" class="bg-gray-800 text-white hover:bg-gray-700" title="Decrease Font Size" aria-label="Decrease font size"><i class="fas fa-minus"></i></button>
+    <button onclick="Accessibility.readPageContent()" class="bg-gray-800 text-blue-400 hover:bg-gray-700" title="Read Page" aria-label="Read page aloud"><i class="fas fa-volume-up"></i></button>
+    <button onclick="VoiceCommands.toggle()" class="bg-gray-800 text-green-400 hover:bg-gray-700" title="Voice Control" aria-label="Toggle voice control"><i class="fas fa-microphone"></i></button>
+  </div>
+  <nav class="bg-white shadow-sm border-b sticky top-0 z-40" role="navigation"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="flex justify-between items-center h-16"><a href="/" class="flex items-center gap-2 text-blue-600 font-bold text-xl"><i class="fas fa-hands-holding-circle text-2xl"></i><span>Ability</span></a><div id="nav-links" class="flex items-center gap-4"></div></div></div></nav>
+
+  <main id="main-content">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <a href="/manage-opportunities.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6 font-medium"><i class="fas fa-arrow-left mr-2"></i>Back</a>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2" id="page-title">Create Opportunity</h1>
+      <p class="text-gray-600 mb-8">Fill in the details to post a new opportunity.</p>
+
+      <form id="opp-form" onsubmit="submitOpportunity(event)" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
+        <div>
+          <label for="opp-title" class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+          <input type="text" id="opp-title" required class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500" placeholder="e.g. Senior Software Developer">
+        </div>
+        <div>
+          <label for="opp-type" class="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+          <select id="opp-type" required class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500">
+            <option value="">Select type</option>
+            <option value="job">Job</option>
+            <option value="scholarship">Scholarship</option>
+            <option value="training">Training</option>
+            <option value="event">Event</option>
+            <option value="resource">Resource</option>
+          </select>
+        </div>
+        <div>
+          <label for="opp-desc" class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+          <textarea id="opp-desc" required rows="6" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500" placeholder="Describe the opportunity in detail..."></textarea>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label for="opp-location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+            <input type="text" id="opp-location" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500" placeholder="e.g. Remote, New York">
+          </div>
+          <div>
+            <label for="opp-deadline" class="block text-sm font-medium text-gray-700 mb-1">Application Deadline</label>
+            <input type="date" id="opp-deadline" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+        <div>
+          <label for="opp-file" class="block text-sm font-medium text-gray-700 mb-1">Attachment (Optional)</label>
+          <input type="file" id="opp-file" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 text-sm">
+        </div>
+        <div class="flex gap-4 pt-4">
+          <button type="submit" id="submit-btn" class="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">
+            <i class="fas fa-paper-plane mr-2"></i>Publish Opportunity
+          </button>
+          <a href="/manage-opportunities.html" class="px-8 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="bg-gray-900 text-gray-400 py-8 mt-auto"><div class="max-w-7xl mx-auto px-4 text-center text-sm"><p>&copy; 2026 Ability.</p></div></footer>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/accessibility.js"></script>
+  <script src="/js/voice-commands.js"></script>
+  <script src="/js/chatbot.js"></script>
+  <script>
+    let editingId = null;
+
+    async function submitOpportunity(e) {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append('title', document.getElementById('opp-title').value);
+      formData.append('type', document.getElementById('opp-type').value);
+      formData.append('description', document.getElementById('opp-desc').value);
+      formData.append('location', document.getElementById('opp-location').value);
+      formData.append('application_deadline', document.getElementById('opp-deadline').value);
+
+      const file = document.getElementById('opp-file').files[0];
+      if (file) formData.append('file_attachment', file);
+
+      try {
+        if (editingId) {
+          await API.upload(`/api/opportunities/${editingId}`, formData, 'PUT');
+          showToast('Opportunity updated!', 'success');
+        } else {
+          await API.upload('/api/opportunities', formData);
+          showToast('Opportunity created!', 'success');
+        }
+        window.location.href = '/manage-opportunities.html';
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function initPage() {
+      if (!Auth.user || (Auth.user.role !== 'organizer' && Auth.user.role !== 'admin')) {
+        window.location.href = '/';
+        return;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      editingId = params.get('edit');
+
+      if (editingId) {
+        document.getElementById('page-title').textContent = 'Edit Opportunity';
+        document.querySelector('#submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i>Save Changes';
+        try {
+          const data = await API.get(`/api/opportunities/${editingId}`);
+          const opp = data.opportunity;
+          document.getElementById('opp-title').value = opp.title;
+          document.getElementById('opp-type').value = opp.type;
+          document.getElementById('opp-desc').value = opp.description;
+          document.getElementById('opp-location').value = opp.location || '';
+          if (opp.application_deadline) {
+            document.getElementById('opp-deadline').value = new Date(opp.application_deadline).toISOString().split('T')[0];
+          }
+        } catch (err) { showToast('Error loading opportunity', 'error'); }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>

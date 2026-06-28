@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opportunity Details - Ability</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div class="accessibility-toggle" role="toolbar" aria-label="Accessibility controls">
+    <button onclick="Accessibility.toggleHighContrast()" class="bg-gray-800 text-yellow-400 hover:bg-gray-700" title="Toggle High Contrast (Alt+C)" aria-label="Toggle high contrast"><i class="fas fa-adjust"></i></button>
+    <button onclick="Accessibility.increaseFontSize()" class="bg-gray-800 text-white hover:bg-gray-700" title="Increase Font Size" aria-label="Increase font size"><i class="fas fa-plus"></i></button>
+    <button onclick="Accessibility.decreaseFontSize()" class="bg-gray-800 text-white hover:bg-gray-700" title="Decrease Font Size" aria-label="Decrease font size"><i class="fas fa-minus"></i></button>
+    <button onclick="Accessibility.readPageContent()" class="bg-gray-800 text-blue-400 hover:bg-gray-700" title="Read Page" aria-label="Read page aloud"><i class="fas fa-volume-up"></i></button>
+    <button onclick="VoiceCommands.toggle()" class="bg-gray-800 text-green-400 hover:bg-gray-700" title="Voice Control" aria-label="Toggle voice control"><i class="fas fa-microphone"></i></button>
+  </div>
+  <nav class="bg-white shadow-sm border-b sticky top-0 z-40" role="navigation" aria-label="Main navigation">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <a href="/" class="flex items-center gap-2 text-blue-600 font-bold text-xl"><i class="fas fa-hands-holding-circle text-2xl"></i><span>Ability</span></a>
+        <div id="nav-links" class="flex items-center gap-4"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main-content">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <a href="/opportunities.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6 font-medium">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Opportunities
+      </a>
+
+      <div id="opportunity-detail" class="bg-white rounded-2xl shadow-sm border p-8">
+        <p class="text-center text-gray-500 py-8">Loading opportunity details...</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-gray-900 text-gray-400 py-8 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 text-center text-sm"><p>&copy; 2026 Ability.</p></div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/accessibility.js"></script>
+  <script src="/js/voice-commands.js"></script>
+  <script src="/js/chatbot.js"></script>
+  <script>
+    let currentOpportunity = null;
+
+    async function loadOpportunity() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) {
+        document.getElementById('opportunity-detail').innerHTML = '<p class="text-center text-red-500 py-8">No opportunity ID provided.</p>';
+        return;
+      }
+
+      try {
+        const data = await API.get(`/api/opportunities/${id}`);
+        currentOpportunity = data.opportunity;
+        renderDetail(data.opportunity);
+      } catch (err) {
+        document.getElementById('opportunity-detail').innerHTML = '<p class="text-center text-red-500 py-8">Opportunity not found.</p>';
+      }
+    }
+
+    function renderDetail(opp) {
+      const isUser = Auth.user && Auth.user.role === 'user';
+      const deadlinePassed = opp.application_deadline && new Date(opp.application_deadline) < new Date();
+
+      document.getElementById('opportunity-detail').innerHTML = `
+        <div class="flex items-center justify-between mb-4">
+          <span class="${getBadgeClass(opp.type)} text-sm">${opp.type}</span>
+          <span class="text-sm text-gray-400"><i class="fas fa-eye mr-1"></i>${opp.views} views</span>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">${opp.title}</h1>
+        <div class="flex flex-wrap gap-4 text-sm text-gray-500 mb-6">
+          <span><i class="fas fa-building mr-1"></i>${opp.organizer_id?.org_name || opp.organizer_id?.name || 'Organization'}</span>
+          <span><i class="fas fa-map-marker-alt mr-1"></i>${opp.location || 'Remote'}</span>
+          <span><i class="fas fa-calendar mr-1"></i>Posted ${formatDate(opp.createdAt)}</span>
+          ${opp.application_deadline ? `<span><i class="fas fa-clock mr-1 text-orange-500"></i>Deadline: ${formatDate(opp.application_deadline)}</span>` : ''}
+        </div>
+        <div class="prose max-w-none mb-8">
+          <h3 class="text-lg font-bold text-gray-900 mb-3">Description</h3>
+          <div class="text-gray-700 leading-relaxed whitespace-pre-wrap">${opp.description}</div>
+        </div>
+        ${opp.organizer_id ? `
+          <div class="bg-gray-50 rounded-xl p-4 mb-8">
+            <h4 class="font-semibold text-gray-900 mb-2">About the Organizer</h4>
+            <p class="text-gray-600 text-sm">${opp.organizer_id.org_name || opp.organizer_id.name}</p>
+            ${opp.organizer_id.contact_person ? `<p class="text-gray-500 text-sm">Contact: ${opp.organizer_id.contact_person}</p>` : ''}
+          </div>
+        ` : ''}
+        <div class="flex gap-4">
+          ${isUser ? `
+            <button onclick="showApplyModal()" class="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition ${deadlinePassed ? 'opacity-50 cursor-not-allowed' : ''}" ${deadlinePassed ? 'disabled' : ''}>
+              <i class="fas fa-paper-plane mr-2"></i>${deadlinePassed ? 'Deadline Passed' : 'Apply Now'}
+            </button>
+          ` : !Auth.user ? `
+            <button onclick="showLoginModal()" class="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">
+              <i class="fas fa-sign-in-alt mr-2"></i>Login to Apply
+            </button>
+          ` : ''}
+          <button onclick="speakDetail()" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition">
+            <i class="fas fa-volume-up mr-2"></i>Read Aloud
+          </button>
+        </div>
+      `;
+    }
+
+    function speakDetail() {
+      if (currentOpportunity) {
+        const text = `${currentOpportunity.title}. ${currentOpportunity.description}. Location: ${currentOpportunity.location || 'Remote'}. Posted by ${currentOpportunity.organizer_id?.org_name || 'Organization'}.`;
+        Accessibility.speakText(text);
+      }
+    }
+
+    function showApplyModal() {
+      if (!Auth.user) { showLoginModal(); return; }
+
+      showModal('Apply to Opportunity', `
+        <form id="apply-form" onsubmit="submitApplication(event)" enctype="multipart/form-data">
+          <div class="space-y-4">
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="font-medium text-gray-700">Applying as: ${Auth.user.name}</p>
+              <p class="text-gray-500">${Auth.user.email}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1" for="apply-cover">Cover Letter *</label>
+              <textarea id="apply-cover" required rows="5" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Tell them why you're a great fit..."></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1" for="apply-resume">Resume (PDF/DOC) *</label>
+              <input type="file" id="apply-resume" required accept=".pdf,.doc,.docx" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1" for="apply-info">Additional Info (Optional)</label>
+              <textarea id="apply-info" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Any additional information..."></textarea>
+            </div>
+          </div>
+        </form>
+      `, `
+        <button onclick="document.getElementById('apply-form').dispatchEvent(new Event('submit',{cancelable:true}))" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">Submit Application</button>
+      `);
+    }
+
+    async function submitApplication(e) {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append('cover_letter', document.getElementById('apply-cover').value);
+      formData.append('additional_info', document.getElementById('apply-info').value);
+      formData.append('resume', document.getElementById('apply-resume').files[0]);
+
+      try {
+        await API.upload(`/api/applications/apply/${currentOpportunity._id}`, formData);
+        document.getElementById('modal-overlay')?.remove();
+        showToast('Application submitted successfully!', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function initPage() {
+      loadOpportunity();
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
