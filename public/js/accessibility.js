@@ -4,8 +4,8 @@ const Accessibility = {
   speaking: false,
 
   init() {
-    this.fontSize = parseInt(localStorage.getItem('ability-fontsize') || '16');
-    this.highContrast = localStorage.getItem('ability-highcontrast') === 'true';
+    this.fontSize = parseInt(localStorage.getItem('inclusify-fontsize') || '16');
+    this.highContrast = localStorage.getItem('inclusify-highcontrast') === 'true';
     document.documentElement.style.fontSize = this.fontSize + 'px';
     if (this.highContrast) document.body.classList.add('high-contrast');
 
@@ -33,7 +33,7 @@ const Accessibility = {
   toggleHighContrast() {
     this.highContrast = !this.highContrast;
     document.body.classList.toggle('high-contrast', this.highContrast);
-    localStorage.setItem('ability-highcontrast', this.highContrast);
+    localStorage.setItem('inclusify-highcontrast', this.highContrast);
     showToast(`High contrast ${this.highContrast ? 'enabled' : 'disabled'}`, 'info');
   },
 
@@ -41,7 +41,7 @@ const Accessibility = {
     if (this.fontSize < 28) {
       this.fontSize += 2;
       document.documentElement.style.fontSize = this.fontSize + 'px';
-      localStorage.setItem('ability-fontsize', this.fontSize);
+      localStorage.setItem('inclusify-fontsize', this.fontSize);
       showToast(`Font size: ${this.fontSize}px`, 'info');
     }
   },
@@ -50,7 +50,7 @@ const Accessibility = {
     if (this.fontSize > 12) {
       this.fontSize -= 2;
       document.documentElement.style.fontSize = this.fontSize + 'px';
-      localStorage.setItem('ability-fontsize', this.fontSize);
+      localStorage.setItem('inclusify-fontsize', this.fontSize);
       showToast(`Font size: ${this.fontSize}px`, 'info');
     }
   },

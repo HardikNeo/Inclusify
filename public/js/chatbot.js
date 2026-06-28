@@ -1,18 +1,18 @@
 const Chatbot = {
   geminiKey: null,
   knowledgeBase: {
-    'hello': 'Hello! Welcome to Ability. How can I help you today?',
-    'hi': 'Hi there! I\'m the Ability assistant. Ask me anything about opportunities, accessibility, or using this platform.',
+    'hello': 'Hello! Welcome to Inclusify. How can I help you today?',
+    'hi': 'Hi there! I\'m the Inclusify assistant. Ask me anything about opportunities, accessibility, or using this platform.',
     'help': 'I can help you with:\n- Finding jobs, scholarships, or training\n- Understanding accessibility features\n- Navigating the platform\n- Voice commands\n\nJust ask!',
-    'what is ability': 'Ability is an accessible platform connecting differently-abled individuals with specialized opportunities including jobs, scholarships, training, events, and resources.',
-    'accessibility': 'Ability offers:\n- High contrast mode (Alt+C)\n- Adjustable font size (Alt+Plus/Minus)\n- Text-to-speech (click the speaker icon)\n- Voice navigation (click the microphone icon)\n- Screen reader support',
+    'what is inclusify': 'Inclusify is an accessible platform connecting differently-abled individuals with specialized opportunities including jobs, scholarships, training, events, and resources.',
+    'accessibility': 'Inclusify offers:\n- High contrast mode (Alt+C)\n- Adjustable font size (Alt+Plus/Minus)\n- Text-to-speech (click the speaker icon)\n- Voice navigation (click the microphone icon)\n- Screen reader support',
     'voice commands': 'Available voice commands:\n- "Go home" - Navigate to homepage\n- "Browse opportunities" - View listings\n- "Toggle contrast" - Switch high contrast\n- "Read page" - Read content aloud\n- "Increase/decrease font" - Adjust text size\n- "Stop" - Stop reading',
     'how to apply': 'To apply for an opportunity:\n1. Browse opportunities on the listings page\n2. Click on an opportunity to view details\n3. Click "Apply Now"\n4. Upload your resume and write a cover letter\n5. Submit your application',
     'jobs': 'You can find jobs by visiting our Browse Opportunities page and filtering by type "Job". Many employers on our platform are committed to inclusive hiring.',
     'scholarships': 'Scholarships are listed on our Browse Opportunities page. Filter by "Scholarship" type to find educational funding opportunities.',
     'register': 'To register, click "Sign Up" and choose whether you\'re a Job Seeker or an Employer/NGO. Fill in your details and you\'re ready to go!',
     'login': 'Click "Log In" in the navigation bar and enter your email and password.',
-    'contact': 'For support, email us at support@ability.org or use this chat for immediate assistance.',
+    'contact': 'For support, email us at support@inclusify.org or use this chat for immediate assistance.',
     'thanks': 'You\'re welcome! Is there anything else I can help with?',
     'thank you': 'You\'re welcome! Happy to help.'
   },
@@ -32,7 +32,7 @@ const Chatbot = {
               <i class="fas fa-robot"></i>
             </div>
             <div>
-              <p class="font-semibold text-sm">Ability Assistant</p>
+              <p class="font-semibold text-sm">Inclusify Assistant</p>
               <p class="text-xs text-blue-100">Always here to help</p>
             </div>
           </div>
@@ -41,7 +41,7 @@ const Chatbot = {
         <div id="chatbot-messages" class="chatbot-messages">
           <div class="chat-message bot">
             <div class="chat-bubble">
-              Hello! I'm the Ability assistant. How can I help you today? You can ask about opportunities, accessibility features, or how to use the platform.
+              Hello! I'm the Inclusify assistant. How can I help you today? You can ask about opportunities, accessibility features, or how to use the platform.
             </div>
           </div>
         </div>
@@ -110,7 +110,7 @@ const Chatbot = {
     }
 
     if (lower.includes('disab') || lower.includes('accommodation') || lower.includes('support')) {
-      return 'Ability is designed with accessibility in mind. We offer screen reader support, voice navigation, high contrast mode, and adjustable text sizes. You can also note your accessibility needs in your profile.';
+      return 'Inclusify is designed with accessibility in mind. We offer screen reader support, voice navigation, high contrast mode, and adjustable text sizes. You can also note your accessibility needs in your profile.';
     }
 
     return 'I\'m not sure I understand that question. Try asking about jobs, scholarships, training, events, accessibility features, or how to use the platform. Type "help" for a list of topics.';
